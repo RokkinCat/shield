@@ -1,4 +1,4 @@
-require "armor"
+require "scrypt"
 require "uri"
 
 module Shield
@@ -98,19 +98,12 @@ module Shield
   end
 
   module Password
-    def self.encrypt(password, salt = generate_salt)
-      Armor.digest(password, salt) + salt
+    def self.encrypt(password)
+      SCrypt::Password.create(password)
     end
 
     def self.check(password, encrypted)
-      sha512, salt = encrypted.to_s[0...128], encrypted.to_s[128..-1]
-
-      Armor.compare(Armor.digest(password, salt), sha512)
-    end
-
-  protected
-    def self.generate_salt
-      Armor.hex(OpenSSL::Random.random_bytes(32))
+      SCrypt::Password.new(encrypted) == password
     end
   end
 end
